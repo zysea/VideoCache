@@ -209,11 +209,12 @@ final class CacheRecord {
     
     private func send(request: AVAssetResourceLoadingRequest) -> SignalProducer<(), NoError> {
         return SignalProducer<(), NoError> { (observer, dispose) in
-            dispose.add(self.dataChanged.startWithValues {
+            let disposable = self.dataChanged.startWithValues {
                 if self.process(request: request) {
                     observer.sendCompleted()
                 }
-            })
+            }
+            dispose += disposable
             }.on(starting: {
                 self.loadingCount.modify { $0 =  $0 + 1 }
             }, disposed: {

@@ -43,8 +43,7 @@ final class MultiRequestDownloader: Downloader {
                     rangeObserver.send(value: range)
                 }
             }
-            
-            dispose.add(rangeSignal.flatMap(.concat) { (value) -> SignalProducer<Message, NSError> in
+            let disposable = rangeSignal.flatMap(.concat) { (value) -> SignalProducer<Message, NSError> in
                 return self.downloader.download(url, range: value).on(completed: check, value: {
                     switch $0 {
                     case .response(let response):
@@ -53,7 +52,8 @@ final class MultiRequestDownloader: Downloader {
                         break
                     }
                 })
-                }.observe(observer))
+                }.observe(observer)
+            dispose += disposable
             
             check()
         }
