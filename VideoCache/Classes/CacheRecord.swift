@@ -185,7 +185,9 @@ final class CacheRecord {
                     self.downloadedLength = writer.offsetInFile
                     self.dataChangedObserver.send(value: ())
                 case .response(let response):
-                    self.meta.length = max(response.totalLength, self.meta.length)
+                    if response.totalLength > self.meta.length {
+                        self.meta.length = response.totalLength
+                    }
                     self.meta.mimeType = response.mimeType ?? ""
                     NSKeyedArchiver.archiveRootObject(self.meta, toFile: self.metaPath)
                     self.dataChangedObserver.send(value: ())
